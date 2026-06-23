@@ -1,17 +1,13 @@
 {
   "name": "lingualan",
   "version": "1.0.0",
-  "description": "Lokale Übersetzungs-App mit Ollama als Engine",
-  "main": "src/index.html",
+  "description": "LinguaLAN - Local machine translation for your desktop. No cloud, no API keys, 100% offline.",
+  "main": "electron-version/main.js",
   "scripts": {
-    "tauri": "tauri",
-    "build": "tauri build"
+    "start": "npm --prefix electron-version start",
+    "build": "npm --prefix electron-version run build",
+    "build:installer": "npm --prefix electron-version run build:installer"
   },
   "license": "MIT",
-  "optionalDependencies": {
-    "@tauri-apps/cli": "^2"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "^2.11.3"
-  }
+  "author": "M1Cortex"
 }

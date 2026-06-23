@@ -1,14 +1,43 @@
 {
-  "name": "lingualan-electron",
-  "version": "0.9.0",
-  "description": "LinguaLAN - Legacy Electron version (local translation desktop app)",
+  "name": "lingualan",
+  "version": "1.0.0",
+  "description": "LinguaLAN - Local translation desktop app (Electron version)",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder build --win portable",
+    "build:installer": "electron-builder build --win nsis"
   },
   "license": "MIT",
+  "author": "M1Cortex",
   "devDependencies": {
-    "electron": "^28.0.0"
+    "electron": "^28.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.lingualan.desktop",
+    "productName": "LinguaLAN",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "../assets/icon.png",
+      "target": ["portable", "nsis"]
+    },
+    "portable": {
+      "artifactName": "LinguaLAN-${version}-electron-${arch}.${ext}"
+    },
+    "nsis": {
+      "artifactName": "LinguaLAN-${version}-electron-setup-${arch}.${ext}"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "popup.html",
+      "popup.js",
+      "renderer.js",
+      "style.css"
+    ]
   }
 }

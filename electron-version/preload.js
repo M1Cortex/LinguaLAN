@@ -1,27 +1,14 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  // Clipboard
-  getClipboard: () => ipcRenderer.invoke('get-clipboard'),
-  startClipboardMonitor: () => ipcRenderer.invoke('start-clipboard-monitor'),
-  stopClipboardMonitor: () => ipcRenderer.invoke('stop-clipboard-monitor'),
-  onClipboardText: (callback) => {
-    ipcRenderer.on('clipboard-text', (_event, text) => callback(text));
+contextBridge.exposeInMainWorld('__TAURI__', {
+  core: {
+    invoke: (cmd, args) => ipcRenderer.invoke(cmd, args || {}),
   },
-  onTriggerTranslate: (callback) => {
-    ipcRenderer.on('trigger-translate', () => callback());
+  event: {
+    listen: (event, callback) => {
+      const handler = (_e, data) => callback({ payload: data });
+      ipcRenderer.on(event, handler);
+      return () => ipcRenderer.removeListener(event, handler);
+    },
   },
-
-  // Hotkey
-  setHotkey: (hotkey) => ipcRenderer.invoke('set-hotkey', hotkey),
-  onHotkeyStatus: (callback) => {
-    ipcRenderer.on('hotkey-status', (_event, status) => callback(status));
-  },
-
-  // Popup
-  onPopupText: (callback) => {
-    ipcRenderer.on('popup-text', (_event, data) => callback(data));
-  },
-  updatePopupSettings: (settings) => ipcRenderer.invoke('update-popup-settings', settings),
-  closePopup: () => ipcRenderer.invoke('close-popup'),
 });
