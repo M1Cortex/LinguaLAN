@@ -1,0 +1,14 @@
+{
+  "name": "lingualan-electron",
+  "version": "0.9.0",
+  "description": "LinguaLAN - Legacy Electron version (local translation desktop app)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
+}

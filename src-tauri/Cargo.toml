@@ -1,0 +1,27 @@
+[package]
+name = "lingualan"
+version = "1.0.0"
+edition = "2021"
+
+[package.metadata]
+
+[lib]
+name = "lingualan_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[profile.release]
+lto = true
+opt-level = "z"
+strip = true
+codegen-units = 1
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-global-shortcut = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+arboard = { version = "3", default-features = false }
+tokio = { version = "1", features = ["rt", "sync", "process", "time"] }

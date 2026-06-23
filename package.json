@@ -1,0 +1,17 @@
+{
+  "name": "lingualan",
+  "version": "1.0.0",
+  "description": "Lokale Übersetzungs-App mit Ollama als Engine",
+  "main": "src/index.html",
+  "scripts": {
+    "tauri": "tauri",
+    "build": "tauri build"
+  },
+  "license": "MIT",
+  "optionalDependencies": {
+    "@tauri-apps/cli": "^2"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.3"
+  }
+}
