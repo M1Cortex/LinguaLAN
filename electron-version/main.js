@@ -124,7 +124,7 @@ ipcMain.handle('set_hotkey', (event, args) => {
             text: text,
             ollamaUrl: popupSettings?.ollamaUrl || 'http://localhost:11434',
             selectedModel: popupSettings?.selectedModel || '',
-            systemPrompt: popupSettings?.systemPrompt || 'Übersetze den folgenden Text von {source} nach {target}. Gib NUR die Übersetzung zurück, ohne Erklärungen oder Zusätze.',
+            systemPrompt: popupSettings?.systemPrompt || 'Translate the following text from {source} to {target}. Return ONLY the translation, without explanations or additions.',
             sourceLang: popupSettings?.sourceLang || 'German',
             targetLang: popupSettings?.targetLang || 'English',
           };
