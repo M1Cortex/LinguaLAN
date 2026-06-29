@@ -13,7 +13,7 @@ let ollamaProcess = null;
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 960, height: 700, minWidth: 700, minHeight: 500,
-    title: 'LinguaLAN - Lokale Übersetzung',
+    title: 'LinguaLAN - Local Translation',
     webPreferences: { contextIsolation: true, nodeIntegration: false, preload: path.join(__dirname, 'preload.js') },
   });
   app.setAppUserModelId('com.lingualan.desktop');
@@ -26,7 +26,7 @@ function createPopupWindow(text, opts) {
   popupWindow = new BrowserWindow({
     width: 400, height: 300, x: Math.max(0, cursor.x - 200), y: Math.max(0, cursor.y + 20),
     alwaysOnTop: true, skipTaskbar: true, frame: false, resizable: false, show: false,
-    title: 'LinguaLAN - Übersetzung',
+    title: 'LinguaLAN - Translation',
     webPreferences: { contextIsolation: true, nodeIntegration: false, preload: path.join(__dirname, 'preload.js') },
   });
   popupWindow.loadFile(path.join(__dirname, 'popup.html'));

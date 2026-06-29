@@ -1,11 +1,11 @@
 const LANGUAGES = {
-  Deutsch: "German", Englisch: "English", Französisch: "French",
-  Spanisch: "Spanish", Italienisch: "Italian", Portugiesisch: "Portuguese",
-  Niederländisch: "Dutch", Polnisch: "Polish", Russisch: "Russian",
-  "Chinesisch (Vereinfacht)": "Chinese", Japanisch: "Japanese",
-  Koreanisch: "Korean", Türkisch: "Turkish", Tschechisch: "Czech",
-  Schwedisch: "Swedish", Dänisch: "Danish", Finnisch: "Finnish",
-  Griechisch: "Greek", Rumänisch: "Romanian", Ungarisch: "Hungarian",
+  German: "German", English: "English", French: "French",
+  Spanish: "Spanish", Italian: "Italian", Portuguese: "Portuguese",
+  Dutch: "Dutch", Polish: "Polish", Russian: "Russian",
+  "Chinese (Simplified)": "Chinese", Japanese: "Japanese",
+  Korean: "Korean", Turkish: "Turkish", Czech: "Czech",
+  Swedish: "Swedish", Danish: "Danish", Finnish: "Finnish",
+  Greek: "Greek", Romanian: "Romanian", Hungarian: "Hungarian",
 };
 
 const SOURCE_LABELS = {};
@@ -45,7 +45,6 @@ const sourceLabel = $("sourceLabel");
 const targetLabel = $("targetLabel");
 const themeToggle = $("themeToggle");
 
-// Ollama management elements
 const ollamaStatusText = $("ollamaStatusText");
 const ollamaDot = $("ollamaDot");
 const ollamaActions = $("ollamaActions");
@@ -61,11 +60,9 @@ const ollamaModelPull = $("ollamaModelPull");
 const pullModelSelect = $("pullModelSelect");
 const pullModelBtn = $("pullModelBtn");
 
-// Dark Mode Toggle
 function applyTheme(isDark) {
   document.body.classList.toggle('dark-mode', isDark);
   localStorage.setItem('dark_mode', isDark ? '1' : '');
-  // Sonne/Mond Icon umschalten
   themeToggle.innerHTML = isDark
     ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
     : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
@@ -73,7 +70,6 @@ function applyTheme(isDark) {
 themeToggle.addEventListener('click', () => {
   applyTheme(!document.body.classList.contains('dark-mode'));
 });
-// Init from localStorage
 if (localStorage.getItem('dark_mode') === '1') applyTheme(true);
 
 let availableModels = [];
@@ -85,14 +81,11 @@ let clipboardMonitoring = false;
 let clipboardMonitorInterval = null;
 let lastClipboard = '';
 
-// Tauri API helper
 const TAURI = window.__TAURI__;
 const invoke = TAURI && TAURI.core ? TAURI.core.invoke : null;
 const listen = TAURI && TAURI.event ? TAURI.event.listen : null;
 
-// Populate selects - alle Sprachen auf beiden Seiten
 function populateSelects() {
-  // select-Elemente sicher leeren (childNodes schleife statt innerHTML)
   while (sourceLang.options.length > 0) sourceLang.remove(0);
   while (targetLang.options.length > 0) targetLang.remove(0);
 
@@ -108,8 +101,8 @@ function populateSelects() {
     o.textContent = label;
     targetLang.add(o);
   }
-  sourceLang.value = "German";   // Standard: Deutsch
-  targetLang.value = "English";  // Standard: Englisch
+  sourceLang.value = "German";
+  targetLang.value = "English";
 }
 populateSelects();
 
@@ -139,7 +132,7 @@ clearBtn.addEventListener("click", () => {
 
 copyBtn.addEventListener("click", () => {
   const text = targetText.innerText;
-  if (text && text !== "Übersetzung erscheint hier...") {
+  if (text && text !== "Translation will appear here...") {
     navigator.clipboard.writeText(text).catch(() => {
       const ta = document.createElement("textarea");
       ta.value = text;
@@ -156,7 +149,6 @@ function updateCharCount() {
 }
 sourceText.addEventListener("input", updateCharCount);
 
-// ---- Hotkey Recorder ----
 let recordingHotkey = false;
 const MOD_KEY_MAP = {
   Control: 'CmdOrCtrl', Meta: 'CmdOrCtrl', Shift: 'Shift', Alt: 'Alt',
@@ -198,14 +190,13 @@ hotkeyInput.addEventListener('keydown', (e) => {
   if (e.shiftKey) mods.add('Shift');
   if (e.altKey) mods.add('Alt');
 
-  // Nur Modifikatoren? nicht akzeptieren
   if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return;
 
   const keyName = getElectronKeyName(e.key, e.code);
   if (!keyName) return;
 
-  if (mods.size === 0) return; // muss mindestens einen Modifikator haben
-  if (!mods.has('CmdOrCtrl')) return; // Strg/Ctrl ist Pflicht
+  if (mods.size === 0) return;
+  if (!mods.has('CmdOrCtrl')) return;
 
   const combo = formatHotkey(mods, keyName);
   hotkeyInput.value = combo;
@@ -224,7 +215,6 @@ function getElectronKeyName(key, code) {
   };
   if (special[key]) return special[key];
 
-  // Buchstaben und Zahlen
   if (/^[A-Za-z0-9]$/.test(key)) return key.toUpperCase();
   if (/^Digit\d$/.test(code)) return code.replace('Digit', '');
   if (/^Numpad\d$/.test(code)) return code.replace('Numpad', '');
@@ -265,7 +255,6 @@ function setClipboardMonitoring(enabled) {
   }
 }
 
-// Listen for hotkey from Rust
 if (listen) {
   listen('hotkey-pressed', async () => {
     if (!invoke) return;
@@ -273,14 +262,13 @@ if (listen) {
       const text = await invoke('get_clipboard');
       if (!text || !text.trim()) return;
       lastClipboard = text;
-      // Popup-Fenster mit Übersetzung öffnen
       invoke('create_popup', {
         text: text,
         source_lang: sourceLang.value,
         target_lang: targetLang.value,
         ollama_url: ollamaBaseUrl,
         selected_model: selectedModel,
-        system_prompt: localStorage.getItem('system_prompt') || 'Übersetze den folgenden Text von {source} nach {target}. Gib NUR die Übersetzung zurück, ohne Erklärungen oder Zusätze.',
+        system_prompt: localStorage.getItem('system_prompt') || 'Translate the following text from {source} to {target}. Return ONLY the translation, without explanations or additions.',
       }).catch(() => {});
     } catch {}
   });
@@ -292,15 +280,13 @@ function syncPopupSettings() {
       settings: {
         ollamaUrl: ollamaBaseUrl,
         selectedModel: selectedModel,
-        systemPrompt: localStorage.getItem('system_prompt') || 'Übersetze den folgenden Text von {source} nach {target}. Gib NUR die Übersetzung zurück, ohne Erklärungen oder Zusätze.',
+        systemPrompt: localStorage.getItem('system_prompt') || 'Translate the following text from {source} to {target}. Return ONLY the translation, without explanations or additions.',
         sourceLang: sourceLang.value,
         targetLang: targetLang.value,
       }
     }).catch(() => {});
   }
 }
-
-// ===== Ollama Management =====
 
 function setOllamaStatus(status, text) {
   ollamaStatusText.textContent = text;
@@ -338,21 +324,21 @@ async function updateOllamaStatus() {
   try {
     const status = await invoke('get_ollama_status');
     if (status === 'running') {
-      setOllamaStatus('running', 'Läuft');
+      setOllamaStatus('running', 'Running');
     } else if (status === 'installed') {
-      setOllamaStatus('installed', 'Installiert (nicht gestartet)');
+      setOllamaStatus('installed', 'Installed (not running)');
     } else {
-      setOllamaStatus('not_installed', 'Nicht installiert');
+      setOllamaStatus('not_installed', 'Not installed');
     }
   } catch (e) {
-    setOllamaStatus('not_installed', 'Fehler: ' + e.message);
+    setOllamaStatus('not_installed', 'Error: ' + e.message);
   }
 }
 
 startOllamaBtn.addEventListener('click', async () => {
   if (!invoke) return;
-  setOllamaStatus('starting', 'Starte Ollama...');
-  showProgress('Starte Ollama Server...');
+  setOllamaStatus('starting', 'Starting Ollama...');
+  showProgress('Starting Ollama server...');
   let unlistenProgress = null;
   try {
     if (listen) {
@@ -361,13 +347,13 @@ startOllamaBtn.addEventListener('click', async () => {
       });
     }
     await invoke('start_ollama');
-    setOllamaStatus('running', 'Läuft');
+    setOllamaStatus('running', 'Running');
     hideProgress();
     ollamaModelPull.classList.remove('hidden');
     checkConnection();
   } catch (e) {
-    setOllamaStatus('installed', 'Start fehlgeschlagen: ' + e.message);
-    showProgress('Fehler: ' + e.message);
+    setOllamaStatus('installed', 'Start failed: ' + e.message);
+    showProgress('Error: ' + e.message);
   }
   if (unlistenProgress) unlistenProgress();
 });
@@ -376,18 +362,18 @@ stopOllamaBtn.addEventListener('click', async () => {
   if (!invoke) return;
   try {
     await invoke('stop_ollama');
-    setOllamaStatus('installed', 'Installiert (gestoppt)');
+    setOllamaStatus('installed', 'Installed (stopped)');
     ollamaModelPull.classList.add('hidden');
   } catch (e) {
-    setOllamaStatus('running', 'Stopp fehlgeschlagen: ' + e.message);
+    setOllamaStatus('running', 'Stop failed: ' + e.message);
   }
 });
 
 downloadOllamaBtn.addEventListener('click', async () => {
   if (!invoke) return;
   downloadOllamaBtn.disabled = true;
-  downloadOllamaBtn.textContent = 'Lädt...';
-  showProgress('Lade Ollama Installer herunter (ca. 400 MB)...');
+  downloadOllamaBtn.textContent = 'Downloading...';
+  showProgress('Downloading Ollama installer (~400 MB)...');
   try {
     const path = await invoke('download_ollama');
     hideProgress();
@@ -395,9 +381,9 @@ downloadOllamaBtn.addEventListener('click', async () => {
     downloadOllamaBtn.classList.add('hidden');
     installOllamaBtn.classList.remove('hidden');
     installOllamaBtn.dataset.path = path;
-    setOllamaStatus('not_installed', 'Installation bereit');
+    setOllamaStatus('not_installed', 'Ready to install');
   } catch (e) {
-    showProgress('Download fehlgeschlagen: ' + e.message);
+    showProgress('Download failed: ' + e.message);
     downloadOllamaBtn.textContent = 'Download';
   }
   downloadOllamaBtn.disabled = false;
@@ -406,19 +392,19 @@ downloadOllamaBtn.addEventListener('click', async () => {
 installOllamaBtn.addEventListener('click', async () => {
   if (!invoke || !installOllamaBtn.dataset.path) return;
   installOllamaBtn.disabled = true;
-  installOllamaBtn.textContent = 'Installiere...';
-  showProgress('Installiere Ollama... (UAC Dialog erscheint ggf.)');
+  installOllamaBtn.textContent = 'Installing...';
+  showProgress('Installing Ollama... (UAC prompt may appear)');
   try {
     await invoke('install_ollama', { path: installOllamaBtn.dataset.path });
     hideProgress();
-    installOllamaBtn.textContent = 'Installieren';
+    installOllamaBtn.textContent = 'Install';
     installOllamaBtn.classList.add('hidden');
-    setOllamaStatus('installed', 'Installiert. Jetzt starten.');
+    setOllamaStatus('installed', 'Installed. Start now.');
     downloadOllamaBtn.classList.add('hidden');
     startOllamaBtn.classList.remove('hidden');
   } catch (e) {
-    showProgress('Installation fehlgeschlagen: ' + e.message);
-    installOllamaBtn.textContent = 'Installieren';
+    showProgress('Installation failed: ' + e.message);
+    installOllamaBtn.textContent = 'Install';
   }
   installOllamaBtn.disabled = false;
 });
@@ -428,8 +414,8 @@ pullModelBtn.addEventListener('click', async () => {
   const model = pullModelSelect.value;
   if (!model) return;
   pullModelBtn.disabled = true;
-  pullModelBtn.textContent = 'Lade...';
-  showProgress(`Lade Modell ${model} herunter (ca. 2 GB)...`);
+  pullModelBtn.textContent = 'Pulling...';
+  showProgress(`Pulling model ${model} (~2 GB)...`);
   let unlistenStatus = null;
   let unlistenProgress = null;
   let unlistenDone = null;
@@ -442,21 +428,21 @@ pullModelBtn.addEventListener('click', async () => {
         showProgress(e.payload);
       });
       unlistenDone = await listen('ollama-pull-done', () => {
-        showProgress('Modell bereit!');
+        showProgress('Model ready!');
       });
     }
     await invoke('pull_ollama_model', { model: model });
     hideProgress();
-    setOllamaStatus('running', 'Läuft (' + model + ')');
+    setOllamaStatus('running', 'Running (' + model + ')');
     localStorage.setItem('selected_model', model);
     selectedModel = model;
     modelName.textContent = model;
     checkConnection();
   } catch (e) {
-    showProgress('Fehler: ' + e.message);
+    showProgress('Error: ' + e.message);
   }
   pullModelBtn.disabled = false;
-  pullModelBtn.textContent = 'Modell laden';
+  pullModelBtn.textContent = 'Pull model';
   if (unlistenStatus) unlistenStatus();
   if (unlistenProgress) unlistenProgress();
   if (unlistenDone) unlistenDone();
@@ -464,11 +450,10 @@ pullModelBtn.addEventListener('click', async () => {
 
 refreshOllamaBtn.addEventListener('click', updateOllamaStatus);
 
-// ===== Settings =====
 settingsBtn.addEventListener("click", () => {
   ollamaUrl.value = ollamaBaseUrl;
   systemPrompt.value = localStorage.getItem("system_prompt") ||
-    "Übersetze den folgenden Text von {source} nach {target}. Gib NUR die Übersetzung zurück, ohne Erklärungen oder Zusätze.";
+    "Translate the following text from {source} to {target}. Return ONLY the translation, without explanations or additions.";
   clipboardWatch.checked = localStorage.getItem("clipboard_watch") === "1";
   hotkeyInput.value = localStorage.getItem("hotkey") || "CmdOrCtrl+Shift+T";
   settingsModal.classList.remove("hidden");
@@ -489,7 +474,6 @@ saveSettings.addEventListener("click", () => {
   localStorage.setItem("ollama_url", ollamaBaseUrl);
   localStorage.setItem("system_prompt", systemPrompt.value);
   setClipboardMonitoring(clipboardWatch.checked);
-  // Hotkey speichern und registrieren
   const hotkey = hotkeyInput.value.trim();
   localStorage.setItem("hotkey", hotkey);
   if (invoke) invoke('set_hotkey', { hotkey: hotkey }).catch(() => {});
@@ -515,7 +499,7 @@ async function loadModels() {
       data = await res.json();
     }
     availableModels = (data.models || []).map((m) => m.name).sort();
-    modelSelect.innerHTML = '<option value="">-- Modell auswählen --</option>';
+    modelSelect.innerHTML = '<option value="">-- Select a model --</option>';
     for (const m of availableModels) {
       const o = document.createElement("option");
       o.value = m;
@@ -523,14 +507,14 @@ async function loadModels() {
       if (m === selectedModel) o.selected = true;
       modelSelect.appendChild(o);
     }
-    connectionStatus.textContent = `Verbunden (${availableModels.length} Modelle)`;
+    connectionStatus.textContent = `Connected (${availableModels.length} models)`;
     connectionStatus.className = "connection-status ok";
     if (!selectedModel && availableModels.length > 0) {
       selectedModel = availableModels[0];
       localStorage.setItem("selected_model", selectedModel);
     }
   } catch (e) {
-    connectionStatus.textContent = `Fehler: ${e.message}`;
+    connectionStatus.textContent = `Error: ${e.message}`;
     connectionStatus.className = "connection-status error";
   }
 }
@@ -557,31 +541,30 @@ async function checkConnection() {
         selectedModel = availableModels[0];
         localStorage.setItem("selected_model", selectedModel);
       }
-  modelName.textContent = selectedModel || "Kein Modell";
+  modelName.textContent = selectedModel || "No model";
   modelDot.className = "dot online";
-  setOllamaStatus('running', 'Läuft');
+  setOllamaStatus('running', 'Running');
   ollamaModelPull.classList.remove('hidden');
   return true;
     }
   } catch (e) {
-    modelName.textContent = "Fehler: " + (e.message || e);
+    modelName.textContent = "Error: " + (e.message || e);
     console.error('checkConnection error:', e);
   }
   modelDot.className = "dot";
-  if (modelName.textContent !== 'Kein Modell' && !modelName.textContent.startsWith('Fehler')) {
+  if (modelName.textContent !== 'No model' && !modelName.textContent.startsWith('Error')) {
     modelName.textContent = "Offline";
   }
   return false;
 }
 
-// Translate / Explain
 translateBtn.addEventListener("click", () => translate('translate'));
 explainBtn.addEventListener("click", () => translate('explain'));
 
 async function translate(mode, textOverride) {
   const text = textOverride || sourceText.value.trim();
-  if (!text) { statusMsg.textContent = "Bitte Text eingeben"; return; }
-  if (!selectedModel) { statusMsg.textContent = "Bitte Modell in Einstellungen wählen"; return; }
+  if (!text) { statusMsg.textContent = "Please enter text"; return; }
+  if (!selectedModel) { statusMsg.textContent = "Please select a model in Settings"; return; }
 
   if (isTranslating && abortController) {
     abortController.abort();
@@ -589,15 +572,15 @@ async function translate(mode, textOverride) {
   }
 
   const isExplain = mode === 'explain';
-  const actionLabel = isExplain ? 'Erklärung' : 'Übersetzung';
+  const actionLabel = isExplain ? 'Explanation' : 'Translation';
 
   isTranslating = true;
   abortController = new AbortController();
   translateBtn.disabled = true;
   explainBtn.disabled = true;
-  translateBtn.innerHTML = isExplain ? "Übersetzen" : "⏳ Übersetzen...";
-  explainBtn.innerHTML = isExplain ? "⏳ Erklären..." : "Erklären";
-  statusMsg.textContent = `${actionLabel} läuft...`;
+  translateBtn.innerHTML = isExplain ? "Translate" : "⏳ Translating...";
+  explainBtn.innerHTML = isExplain ? "⏳ Explaining..." : "Explain";
+  statusMsg.textContent = `${actionLabel} in progress...`;
   targetText.innerHTML = "";
   translationInfo.textContent = "";
 
@@ -609,11 +592,11 @@ async function translate(mode, textOverride) {
   let sysPrompt;
   const targetLabel = SOURCE_LABELS[targetLang.value] || targetLang.value;
   if (isExplain) {
-    sysPrompt = `Erkläre den folgenden Code Schritt für Schritt. Gehe auf die wichtigsten Konzepte, Funktionen und Besonderheiten ein. Erkläre auf ${targetLabel}.`;
+    sysPrompt = `Explain the following code step by step. Cover the important concepts, functions and special details. Explain in ${targetLabel}.`;
   } else {
     const fromLabel = SOURCE_LABELS[sourceLang.value] || sourceLang.value;
     sysPrompt = (localStorage.getItem("system_prompt") ||
-      "Übersetze den folgenden Text von {source} nach {target}. Gib NUR die Übersetzung zurück, ohne Erklärungen oder Zusätze.")
+      "Translate the following text from {source} to {target}. Return ONLY the translation, without explanations or additions.")
       .replace("{source}", fromLabel)
       .replace("{target}", targetLabel);
   }
@@ -639,7 +622,6 @@ async function translate(mode, textOverride) {
         body: JSON.stringify({ model: selectedModel, prompt: `${sysPrompt}\n\n${text}`, stream: true }),
       });
     } else {
-      // Direct fetch fallback
       abortController.signal.addEventListener('abort', () => {});
       const res = await fetch(`${ollamaBaseUrl}/api/generate`, {
         method: "POST",
@@ -677,27 +659,26 @@ async function translate(mode, textOverride) {
       }
       try { reader.releaseLock(); } catch {}
     }
-    const doneLabel = isExplain ? 'Erklärung' : 'Übersetzung';
-    translationInfo.textContent = `${doneLabel} mit ${selectedModel}`;
+    const doneLabel = isExplain ? 'Explanation' : 'Translation';
+    translationInfo.textContent = `${doneLabel} via ${selectedModel}`;
     statusMsg.textContent = "";
-    if (!fullText) targetText.innerHTML = '<div class="placeholder">Keine Antwort erhalten</div>';
+    if (!fullText) targetText.innerHTML = '<div class="placeholder">No response received</div>';
   } catch (e) {
-    if (e.name === "AbortError") statusMsg.textContent = "Abgebrochen";
+    if (e.name === "AbortError") statusMsg.textContent = "Cancelled";
     else {
-      targetText.textContent = `Fehler: ${e.message}`;
-      statusMsg.textContent = `${actionLabel} fehlgeschlagen`;
+      targetText.textContent = `Error: ${e.message}`;
+      statusMsg.textContent = `${actionLabel} failed`;
     }
   } finally {
     isTranslating = false;
     abortController = null;
     translateBtn.disabled = false;
     explainBtn.disabled = false;
-    translateBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 7 4"/><polyline points="17 4 20 4 20 7"/><polyline points="20 17 20 20 17 20"/><polyline points="7 20 4 20 4 17"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="7" y1="12" x2="17" y2="12"/></svg> Übersetzen`;
-    explainBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Erklären`;
+    translateBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 7 4"/><polyline points="17 4 20 4 20 7"/><polyline points="20 17 20 20 17 20"/><polyline points="7 20 4 20 4 17"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="7" y1="12" x2="17" y2="12"/></svg> Translate`;
+    explainBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Explain`;
   }
 }
 
-// Keyboard shortcuts
 sourceText.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
     e.preventDefault();
@@ -705,30 +686,27 @@ sourceText.addEventListener("keydown", (e) => {
   }
 });
 
-// Init
 (async () => {
   if (selectedModel) modelName.textContent = selectedModel;
   if (localStorage.getItem("clipboard_watch") === "1") {
     setClipboardMonitoring(true);
   }
-  // Gespeicherten Hotkey registrieren
   const savedHotkey = localStorage.getItem("hotkey") || "CmdOrCtrl+Shift+T";
   if (invoke) {
     invoke('set_hotkey', { hotkey: savedHotkey }).catch(() => {});
   }
   const connected = await checkConnection();
   if (!connected && invoke) {
-    // Auto-start Ollama if installed but not running
     try {
       const status = await invoke('get_ollama_status');
       if (status === 'installed') {
-        setOllamaStatus('starting', 'Starte Ollama automatisch...');
+        setOllamaStatus('starting', 'Starting Ollama automatically...');
         try {
           await invoke('start_ollama');
-          setOllamaStatus('running', 'Läuft');
+          setOllamaStatus('running', 'Running');
           await checkConnection();
         } catch (e) {
-          setOllamaStatus('installed', 'Ollama bereit');
+          setOllamaStatus('installed', 'Ollama ready');
         }
       }
     } catch {}

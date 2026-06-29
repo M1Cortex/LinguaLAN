@@ -1,6 +1,6 @@
 window.onerror = (msg, url, line) => {
   const d = document.getElementById('translationDisplay');
-  if (d) d.textContent = `Fehler: ${msg} (Zeile ${line})`;
+  if (d) d.textContent = `Error: ${msg} (line ${line})`;
 };
 
 if (localStorage.getItem('dark_mode') === '1') document.body.classList.add('dark-mode');
@@ -22,12 +22,12 @@ closeBtn.addEventListener('click', () => { if (invoke) invoke('close_popup').cat
 
 pinBtn.addEventListener('click', () => {
   isPinned = !isPinned;
-  pinBtn.textContent = isPinned ? 'Angheftet 📌' : 'Anheften';
+  pinBtn.textContent = isPinned ? '📌 Pinned' : 'Pin';
 });
 
 copyBtn.addEventListener('click', () => {
   const text = translationDisplay.innerText;
-  if (text && text !== 'Übersetzung wird geladen...') {
+  if (text && text !== 'Loading translation...') {
     navigator.clipboard.writeText(text).catch(() => {
       const ta = document.createElement('textarea');
       ta.value = text; document.body.appendChild(ta); ta.select();
@@ -40,28 +40,27 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !isPinned && invoke) invoke('close_popup').catch(() => {});
 });
 
-// Popup-Daten per IPC abholen
 (async () => {
   if (!invoke) return;
   try {
     const data = await invoke('get_popup_data');
-    if (!data) { translationDisplay.textContent = 'Fehler: Keine Daten'; return; }
+    if (!data) { translationDisplay.textContent = 'Error: No data'; return; }
     const { text, ollamaUrl, selectedModel, systemPrompt, sourceLang, targetLang } = data;
     sourceDisplay.textContent = text.substring(0, 200) + (text.length > 200 ? '...' : '');
     if (!selectedModel) {
-      translationDisplay.textContent = 'Fehler: Kein Modell ausgewählt';
+      translationDisplay.textContent = 'Error: No model selected';
     } else {
       translate(text, ollamaUrl, selectedModel, systemPrompt, sourceLang, targetLang);
     }
   } catch (e) {
-    translationDisplay.textContent = 'Fehler: ' + e.message;
+    translationDisplay.textContent = 'Error: ' + e.message;
   }
 })();
 
 async function translate(text, ollamaUrl, selectedModel, systemPrompt, sourceLang, targetLang) {
-  translationDisplay.innerHTML = '<div class="placeholder">Übersetzung läuft...</div>';
-  const fromLabel = sourceLang || 'unbekannt';
-  const toLabel = targetLang || 'Deutsch';
+  translationDisplay.innerHTML = '<div class="placeholder">Translating...</div>';
+  const fromLabel = sourceLang || 'unknown';
+  const toLabel = targetLang || 'German';
   const prompt = (systemPrompt || '').replace('{source}', fromLabel).replace('{target}', toLabel);
 
   let fullText = '';
@@ -108,6 +107,6 @@ async function translate(text, ollamaUrl, selectedModel, systemPrompt, sourceLan
     }
     modelInfo.textContent = `via ${selectedModel}`;
   } catch (e) {
-    translationDisplay.textContent = `Fehler: ${e.message}`;
+    translationDisplay.textContent = `Error: ${e.message}`;
   }
 }
