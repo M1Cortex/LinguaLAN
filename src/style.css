@@ -157,17 +157,19 @@ main { flex: 1; display: flex; align-items: stretch; padding: 16px 0; min-height
 }
 .panel-footer #statusMsg { color: var(--primary); }
 
-footer { padding: 12px 0 8px; display: flex; justify-content: center; flex-shrink: 0; }
+footer { padding: 12px 0 8px; display: flex; justify-content: center; gap: 10px; flex-shrink: 0; }
 
-.translate-btn {
+.translate-btn, .explain-btn {
   display: flex; align-items: center; gap: 8px;
-  padding: 10px 32px; background: var(--primary); color: white;
-  border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
-  cursor: pointer; transition: var(--transition);
-  box-shadow: 0 2px 8px rgba(74,108,247,0.3);
+  padding: 10px 24px; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: var(--transition);
 }
+.translate-btn { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(74,108,247,0.3); }
 .translate-btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
 .translate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.explain-btn { background: var(--surface); color: var(--primary); border: 1px solid var(--primary); }
+.explain-btn:hover { background: var(--primary-light); transform: translateY(-1px); }
+.explain-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 /* Modal */
 .modal { display: none; position: fixed; inset: 0; z-index: 100; }

@@ -23,6 +23,7 @@ const charCount = $("charCount");
 const statusMsg = $("statusMsg");
 const translationInfo = $("translationInfo");
 const translateBtn = $("translateBtn");
+const explainBtn = $("explainBtn");
 const clearBtn = $("clearBtn");
 const copyBtn = $("copyBtn");
 const settingsBtn = $("settingsBtn");
@@ -573,10 +574,13 @@ async function checkConnection() {
   return false;
 }
 
-// Translate
-translateBtn.addEventListener("click", () => translate());
+const EXPLAIN_PROMPT = "Erkläre den folgenden Code Schritt für Schritt. Gehe auf die wichtigsten Konzepte, Funktionen und Besonderheiten ein. Erkläre auf Deutsch.";
 
-async function translate(textOverride) {
+// Translate / Explain
+translateBtn.addEventListener("click", () => translate('translate'));
+explainBtn.addEventListener("click", () => translate('explain'));
+
+async function translate(mode, textOverride) {
   const text = textOverride || sourceText.value.trim();
   if (!text) { statusMsg.textContent = "Bitte Text eingeben"; return; }
   if (!selectedModel) { statusMsg.textContent = "Bitte Modell in Einstellungen wählen"; return; }
@@ -586,11 +590,16 @@ async function translate(textOverride) {
     return;
   }
 
+  const isExplain = mode === 'explain';
+  const actionLabel = isExplain ? 'Erklärung' : 'Übersetzung';
+
   isTranslating = true;
   abortController = new AbortController();
   translateBtn.disabled = true;
-  translateBtn.innerHTML = "⏳ Übersetzen...";
-  statusMsg.textContent = "Übersetzung läuft...";
+  explainBtn.disabled = true;
+  translateBtn.innerHTML = isExplain ? "Übersetzen" : "⏳ Übersetzen...";
+  explainBtn.innerHTML = isExplain ? "⏳ Erklären..." : "Erklären";
+  statusMsg.textContent = `${actionLabel} läuft...`;
   targetText.innerHTML = "";
   translationInfo.textContent = "";
 
@@ -599,12 +608,17 @@ async function translate(textOverride) {
     updateCharCount();
   }
 
-  const fromLabel = SOURCE_LABELS[sourceLang.value] || sourceLang.value;
-  const toLabel = SOURCE_LABELS[targetLang.value] || targetLang.value;
-  const sysPrompt = (localStorage.getItem("system_prompt") ||
-    "Übersetze den folgenden Text von {source} nach {target}. Gib NUR die Übersetzung zurück, ohne Erklärungen oder Zusätze.")
-    .replace("{source}", fromLabel)
-    .replace("{target}", toLabel);
+  let sysPrompt;
+  if (isExplain) {
+    sysPrompt = EXPLAIN_PROMPT;
+  } else {
+    const fromLabel = SOURCE_LABELS[sourceLang.value] || sourceLang.value;
+    const toLabel = SOURCE_LABELS[targetLang.value] || targetLang.value;
+    sysPrompt = (localStorage.getItem("system_prompt") ||
+      "Übersetze den folgenden Text von {source} nach {target}. Gib NUR die Übersetzung zurück, ohne Erklärungen oder Zusätze.")
+      .replace("{source}", fromLabel)
+      .replace("{target}", toLabel);
+  }
 
   let fullText = "";
   let unlistenChunk = null;
@@ -665,20 +679,23 @@ async function translate(textOverride) {
       }
       try { reader.releaseLock(); } catch {}
     }
-    translationInfo.textContent = `Mit ${selectedModel}`;
+    const doneLabel = isExplain ? 'Erklärung' : 'Übersetzung';
+    translationInfo.textContent = `${doneLabel} mit ${selectedModel}`;
     statusMsg.textContent = "";
-    if (!fullText) targetText.innerHTML = '<div class="placeholder">Keine Übersetzung erhalten</div>';
+    if (!fullText) targetText.innerHTML = '<div class="placeholder">Keine Antwort erhalten</div>';
   } catch (e) {
     if (e.name === "AbortError") statusMsg.textContent = "Abgebrochen";
     else {
       targetText.textContent = `Fehler: ${e.message}`;
-      statusMsg.textContent = "Übersetzung fehlgeschlagen";
+      statusMsg.textContent = `${actionLabel} fehlgeschlagen`;
     }
   } finally {
     isTranslating = false;
     abortController = null;
     translateBtn.disabled = false;
+    explainBtn.disabled = false;
     translateBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 7 4"/><polyline points="17 4 20 4 20 7"/><polyline points="20 17 20 20 17 20"/><polyline points="7 20 4 20 4 17"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="7" y1="12" x2="17" y2="12"/></svg> Übersetzen`;
+    explainBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Erklären`;
   }
 }
 
