@@ -4,10 +4,13 @@
   "description": "LinguaLAN - Local machine translation for your desktop. No cloud, no API keys, 100% offline.",
   "main": "electron-version/main.js",
   "scripts": {
-    "start": "npm --prefix electron-version start",
+    "start": "electron electron-version",
     "build": "npm --prefix electron-version run build",
     "build:installer": "npm --prefix electron-version run build:installer"
   },
   "license": "MIT",
-  "author": "M1Cortex"
+  "author": "M1Cortex",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
 }
