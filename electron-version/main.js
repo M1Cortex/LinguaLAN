@@ -2,7 +2,7 @@ const { app, BrowserWindow, globalShortcut, clipboard, ipcMain, screen } = requi
 const path = require('path');
 const http = require('http');
 const net = require('net');
-const { spawn, execSync } = require('child_process');
+const { spawn, execSync, exec } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 
@@ -36,6 +36,12 @@ function createPopupWindow(text, opts) {
 }
 
 function readClipboard() { try { return (clipboard.readText('clipboard') || '').trim(); } catch { return ''; } }
+
+function copySelection() {
+  try {
+    execSync('powershell -c "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait(\'^c\')"', { timeout: 1000 });
+  } catch {}
+}
 
 // ===== IPC Handlers =====
 
@@ -115,21 +121,21 @@ ipcMain.handle('set_hotkey', (event, args) => {
   const key = args.hotkey.replace(/CmdOrCtrl/g, 'CommandOrControl');
   try {
     globalShortcut.register(key, () => {
+      copySelection();
       const text = readClipboard();
-      if (text && mainWindow && !mainWindow.isDestroyed()) {
-        if (mainWindow.isVisible()) {
-          mainWindow.webContents.send('hotkey-pressed', '');
-        } else {
-          pendingPopupData = {
-            text: text,
-            ollamaUrl: popupSettings?.ollamaUrl || 'http://localhost:11434',
-            selectedModel: popupSettings?.selectedModel || '',
-            systemPrompt: popupSettings?.systemPrompt || 'Translate the following text from {source} to {target}. Return ONLY the translation, without explanations or additions.',
-            sourceLang: popupSettings?.sourceLang || 'German',
-            targetLang: popupSettings?.targetLang || 'English',
-          };
-          createPopupWindow(text, {});
-        }
+      if (!text || !mainWindow || mainWindow.isDestroyed()) return;
+      if (mainWindow.isVisible()) {
+        mainWindow.webContents.send('hotkey-pressed', '');
+      } else {
+        pendingPopupData = {
+          text: text,
+          ollamaUrl: popupSettings?.ollamaUrl || 'http://localhost:11434',
+          selectedModel: popupSettings?.selectedModel || '',
+          systemPrompt: popupSettings?.systemPrompt || 'Translate the following text from {source} to {target}. Return ONLY the translation, without explanations or additions.',
+          sourceLang: popupSettings?.sourceLang || 'German',
+          targetLang: popupSettings?.targetLang || 'English',
+        };
+        createPopupWindow(text, {});
       }
     });
     return true;
