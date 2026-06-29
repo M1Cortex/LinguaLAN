@@ -574,8 +574,6 @@ async function checkConnection() {
   return false;
 }
 
-const EXPLAIN_PROMPT = "Erkläre den folgenden Code Schritt für Schritt. Gehe auf die wichtigsten Konzepte, Funktionen und Besonderheiten ein. Erkläre auf Deutsch.";
-
 // Translate / Explain
 translateBtn.addEventListener("click", () => translate('translate'));
 explainBtn.addEventListener("click", () => translate('explain'));
@@ -609,15 +607,15 @@ async function translate(mode, textOverride) {
   }
 
   let sysPrompt;
+  const targetLabel = SOURCE_LABELS[targetLang.value] || targetLang.value;
   if (isExplain) {
-    sysPrompt = EXPLAIN_PROMPT;
+    sysPrompt = `Erkläre den folgenden Code Schritt für Schritt. Gehe auf die wichtigsten Konzepte, Funktionen und Besonderheiten ein. Erkläre auf ${targetLabel}.`;
   } else {
     const fromLabel = SOURCE_LABELS[sourceLang.value] || sourceLang.value;
-    const toLabel = SOURCE_LABELS[targetLang.value] || targetLang.value;
     sysPrompt = (localStorage.getItem("system_prompt") ||
       "Übersetze den folgenden Text von {source} nach {target}. Gib NUR die Übersetzung zurück, ohne Erklärungen oder Zusätze.")
       .replace("{source}", fromLabel)
-      .replace("{target}", toLabel);
+      .replace("{target}", targetLabel);
   }
 
   let fullText = "";
